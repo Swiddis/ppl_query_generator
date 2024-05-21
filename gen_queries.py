@@ -31,6 +31,16 @@ def head(_context: QueryContext):
     return random.choice(["head 1", "head 5", "head", "head 20", "head 50"])
 
 
+def rare(context: QueryContext):
+    key = context.random_key()
+    by = context.random_key()
+    context.clear()
+    if by != key and random.random() < 0.75:
+        return f"rare {key} by {by}"
+    else:
+        return f"rare {key}"
+
+
 def rename(context: QueryContext):
     key = context.random_key()
     tail = re.split(r"[\._]", key)[-1]
@@ -73,7 +83,7 @@ def generate_segment(context: QueryContext, allow_terminals=False, retries=0) ->
     if allow_terminals:
         # Terminal conditions should only go at the end of a query. Generally not strictly necessary
         # that the query ends after one of these, but it's not clear why it'd be necessary
-        choices += [head, stats]
+        choices += [head, rare, stats]
     segment = random.choice(choices)
     try:
         return segment(context)
