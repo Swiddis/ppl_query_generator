@@ -114,12 +114,12 @@ def where(context: QueryContext):
         seen_keys.add(key)
 
         expr = context.generate_boolean_expression(key)
-        if random.random() < 0.2:
-            exprs.append(f"NOT {expr}")
-        else:
-            exprs.append(expr)
+        # No "NOT" since it's equivalent to flipping the operation and engines tend to do poorly
+        # with generating correct queries corresponding to results with negation
+        exprs.append(expr)
+    # Not including XOR here since engine struggles a lot with phrasing the questions
     result = reduce(lambda a, b: a + random.choice([
-        " AND ", " OR ", " XOR "
+        " AND ", " OR "
     ]) + b, exprs)
     return f"where {result}"
 
@@ -184,7 +184,7 @@ if __name__ == "__main__":
     with open(f"schemas/{schema_name}.json", "r") as schema_file:
         schema = json.load(schema_file)
 
-    for _ in range(gen_count):
+    for i in range(gen_count):
         context = QueryContext(schema)
         query = generate_query(schema_name, context)
-        print(query)
+        print(f"{i+1}.", query)
