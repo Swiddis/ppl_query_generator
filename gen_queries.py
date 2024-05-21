@@ -4,13 +4,9 @@ import random
 from context import QueryContext
 
 
-def where(context: QueryContext):
-    # TODO there should be a dedicated way to create expressions instead of doing it
-    # ad_hoc here. Probably we need to standardize expression generation per prop type,
-    # and work from there.
+def dedup(context: QueryContext):
     key = context.random_key()
-    expr = context.generate_boolean_expression(key)
-    return f"where {expr}"
+    return f"dedup {key}"
 
 
 def fields(context: QueryContext):
@@ -28,11 +24,17 @@ def stats(context: QueryContext):
     # implementation will add min/max and other functions, and better detect termination.
     key = context.random_key()
     context.clear()
-    return f"stats count() as count by {key}"
+    return f"stats count() by {key}"
+
+
+def where(context: QueryContext):
+    key = context.random_key()
+    expr = context.generate_boolean_expression(key)
+    return f"where {expr}"
 
 
 def generate_segment(context: QueryContext, allow_terminals=False):
-    choices = [where, fields]
+    choices = [dedup, fields, where]
     if allow_terminals:
         choices += [stats]
     segment = random.choice(choices)
