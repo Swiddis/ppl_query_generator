@@ -39,6 +39,17 @@ def rare(context: QueryContext):
         return f"rare {key} by {by}"
     else:
         return f"rare {key}"
+    
+
+def top(context: QueryContext):
+    top = random.choice(["top 1", "top 5", "top", "top 20", "top 50"])
+    key = context.random_key()
+    by = context.random_key()
+    context.clear()
+    if by != key and random.random() < 0.75:
+        return f"{top} {key} by {by}"
+    else:
+        return f"{top} {key}"
 
 
 def rename(context: QueryContext):
@@ -83,7 +94,7 @@ def generate_segment(context: QueryContext, allow_terminals=False, retries=0) ->
     if allow_terminals:
         # Terminal conditions should only go at the end of a query. Generally not strictly necessary
         # that the query ends after one of these, but it's not clear why it'd be necessary
-        choices += [head, rare, stats]
+        choices += [head, rare, stats, top]
     segment = random.choice(choices)
     try:
         return segment(context)
