@@ -11,6 +11,9 @@ class QueryContext(dict):
     def __init__(self, context):
         # Initialize self as dict for all the familiar methods
         context = copy.deepcopy(context)
+
+        context = dict((k, v) for k, v in context.items() if v["type"] != "none")
+
         super(QueryContext, self).__init__(context)
         self.__dict__ == self
 
@@ -35,6 +38,8 @@ class QueryContext(dict):
                 return repr(random.choice(props["values"]))
             case "int":
                 return repr(random.randint(props["min"], props["max"]))
+            case "float":
+                return repr(random.random() * (props["max"] - props["min"]) + props["min"])
             case "list":
                 # TODO this probably needs better handling but it's not clear what lists
                 # actually do
@@ -98,6 +103,9 @@ class QueryContext(dict):
             case "int":
                 op = random.choice(["=", "!=", ">", ">=", "<", "<="])
                 return f"{key} {op} {sample_value}"
+            case "float":
+                op = random.choice(["=", "!=", ">", ">=", "<", "<="])
+                return f"{key} {op} {sample_value}"
             case "list":
                 # It's not entirely clear what list operations are supported, but '=' and '!=' at
                 # least cover CONTAINS/NOT CONTAINS
@@ -106,6 +114,9 @@ class QueryContext(dict):
             case "time":
                 op = random.choice(["=", ">", ">=", "<", "<="])
                 return f"{key} {op} {sample_value}"
+            case unknown:
+                raise ValueError(f"Unknown prop type: {unknown}")
+
 
     def filter(self, keys):
         old_keys = list(self.keys())
