@@ -7,7 +7,7 @@ from collections import defaultdict, Counter
 import json
 import re
 
-ISO_TIME_RE = re.compile("\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z")
+ISO_TIME_RE = re.compile(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z")
 
 
 def scan_record(record, target, prefix=""):
@@ -75,20 +75,25 @@ def find_schema(agg_records):
                         "type": "text",
                         "values": examples,
                         "nullable": nullable,
+                        "unique": max(ctr.values()) == 1,
                     }
             case "int":
+                ctr = Counter(values)
                 result[key] = {
                     "type": "int",
                     "min": min(values),
                     "max": max(values),
                     "nullable": nullable,
+                    "unique": max(ctr.values()) == 1,
                 }
             case "float":
+                ctr = Counter(values)
                 result[key] = {
                     "type": "float",
                     "min": min(values),
                     "max": max(values),
                     "nullable": nullable,
+                    "unique": max(ctr.values()) == 1,
                 }
             case "list":
                 ctr = Counter(v for l in values for v in l)
@@ -108,7 +113,7 @@ def find_schema(agg_records):
                     "nullable": nullable,
                 }
             case "none":
-                result[key] = {"type": "none", "nullable": True}
+                result[key] = {"type": "none"}
     return result
 
 
