@@ -34,7 +34,7 @@ def head(_context: QueryContext):
 def rare(context: QueryContext):
     key = context.random_key()
     by = context.random_key()
-    context.clear()
+    context.filter([key, by])
     if by != key and random.random() < 0.75:
         return f"rare {key} by {by}"
     else:
@@ -45,7 +45,7 @@ def top(context: QueryContext):
     top = random.choice(["top 1", "top 5", "top", "top 20", "top 50"])
     key = context.random_key()
     by = context.random_key()
-    context.clear()
+    context.filter([key, by])
     if by != key and random.random() < 0.75:
         return f"{top} {key} by {by}"
     else:
@@ -73,11 +73,31 @@ def sort(context: QueryContext):
         raise Retry()
 
 def stats(context: QueryContext):
-    # TODO for now we assume stats is terminal and only implement count() -- a better
-    # implementation will add min/max and other functions, and better detect termination.
-    key = context.random_key()
+    # TODO for now we assume stats is terminal and don't deal with context enrichment.
+    stats = random.sample(["count", "sum", "avg", "max", "min"], random.randint(1, 3))
+    aggs = []
+    for stat in stats:
+        try:
+            key = context.random_key(numeric=stat != "count")
+            if stat == "count" and random.random() < 0.5:
+                stat_call = "count()"
+            else:
+                stat_call = f"{stat}({key})"
+            aggs.append(f"{stat_call}")
+        except IndexError:
+            continue
+        
+    if aggs == []:
+        # All stat loops failed
+        raise Retry()
+    
+    by = context.random_key()
     context.clear()
-    return f"stats count() by {key}"
+
+    if not any(by in agg for agg in aggs) and random.random() < 0.5:
+        return f"stats {', '.join(aggs)} by {by}"
+    else:
+        return f"stats {', '.join(aggs)}"
 
 
 def where(context: QueryContext):

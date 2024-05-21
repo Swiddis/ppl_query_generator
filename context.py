@@ -17,10 +17,12 @@ class QueryContext(dict):
         # Guards are conditions that block values from being generated
         self.guards = {key: set() for key in context}
 
-    def random_key(self, sortable=False):
+    def random_key(self, sortable=False, numeric=False):
         items = list(self.items())
         if sortable:
-            items = [(k, v) for k, v in items if v["type"] in ("text", "int", "time")]
+            items = [(k, v) for k, v in items if v["type"] in ("text", "int", "float", "time")]
+        if numeric:
+            items = [(k, v) for k, v in items if v["type"] in ("float", "int")]
         return random.choice(items)[0]
 
     def random_item(self):
