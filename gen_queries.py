@@ -9,9 +9,8 @@ def where(context: QueryContext):
     # ad_hoc here. Probably we need to standardize expression generation per prop type,
     # and work from there.
     key = context.random_key()
-    value = context.sample_value(key)
-    op = random.choice(["<", ">", "=", "!=", ">=", "<="])
-    return f"where {key} {op} {value}"
+    expr = context.generate_boolean_expression(key)
+    return f"where {expr}"
 
 
 def fields(context: QueryContext):

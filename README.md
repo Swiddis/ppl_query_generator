@@ -4,8 +4,7 @@ A script to generate meaningful(ish) PPL queries given sufficiently vibrant samp
 
 ## Setup
 
-The project has no external dependencies at the moment: a recent-ish Python 3
-interpreter will do.
+The project has no external dependencies at the moment: any Python 3.10+ interpreter will do.
 
 ## Usage
 
