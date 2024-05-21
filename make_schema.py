@@ -118,8 +118,8 @@ def find_schema(agg_records):
 
 
 if __name__ == "__main__":
-    DATA_FILE = "data/nginx_raw.json"
-    SCHEMA_FILE = "schemas/ss4o_logs-nginx-sample-sample.json"
+    DATA_FILE = "data/apache_raw.json"
+    SCHEMA_FILE = "schemas/ss4o_logs_apache-apache-sample-sample.json"
 
     with open(DATA_FILE, "r") as in_file:
         records = json.load(in_file)

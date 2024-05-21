@@ -1,0 +1,228 @@
+{
+  "observedTimestamp": {
+    "type": "time",
+    "min": "2023-07-21T16:52:08.000Z",
+    "max": "2023-07-25T00:52:08.000Z",
+    "nullable": false
+  },
+  "http.response.status_code": {
+    "type": "int",
+    "min": 400,
+    "max": 406,
+    "nullable": true,
+    "unique": false
+  },
+  "http.response.bytes": {
+    "type": "int",
+    "min": 6141,
+    "max": 6141,
+    "nullable": true,
+    "unique": false
+  },
+  "http.url": {
+    "type": "keyword",
+    "values": [
+      "/strategize"
+    ],
+    "nullable": true
+  },
+  "http.flavor": {
+    "type": "keyword",
+    "values": [
+      "1.1"
+    ],
+    "nullable": true
+  },
+  "http.request.method": {
+    "type": "keyword",
+    "values": [
+      "GET"
+    ],
+    "nullable": true
+  },
+  "http.user_agent.original": {
+    "type": "keyword",
+    "values": [
+      "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36"
+    ],
+    "nullable": true
+  },
+  "http.user_agent.name": {
+    "type": "keyword",
+    "values": [
+      "Chrome"
+    ],
+    "nullable": true
+  },
+  "http.user_agent.version": {
+    "type": "keyword",
+    "values": [
+      "114.0.0"
+    ],
+    "nullable": true
+  },
+  "http.user_agent.os.name": {
+    "type": "keyword",
+    "values": [
+      "Mac OS X"
+    ],
+    "nullable": true
+  },
+  "http.user_agent.os.full": {
+    "type": "keyword",
+    "values": [
+      "Mac OS X 10.15.7"
+    ],
+    "nullable": true
+  },
+  "http.user_agent.os.version": {
+    "type": "keyword",
+    "values": [
+      "10.15.7"
+    ],
+    "nullable": true
+  },
+  "http.user_agent.os.device.name": {
+    "type": "keyword",
+    "values": [
+      "Mac"
+    ],
+    "nullable": true
+  },
+  "attributes.data_stream.dataset": {
+    "type": "keyword",
+    "values": [
+      "apache.access",
+      "apache.error"
+    ],
+    "nullable": false
+  },
+  "attributes.data_stream.namespace": {
+    "type": "keyword",
+    "values": [
+      "production"
+    ],
+    "nullable": false
+  },
+  "attributes.data_stream.type": {
+    "type": "keyword",
+    "values": [
+      "logs"
+    ],
+    "nullable": false
+  },
+  "event.result": {
+    "type": "keyword",
+    "values": [
+      "error",
+      "success"
+    ],
+    "nullable": false
+  },
+  "event.category": {
+    "type": "keyword",
+    "values": [
+      "web"
+    ],
+    "nullable": false
+  },
+  "event.name": {
+    "type": "keyword",
+    "values": [
+      "access",
+      "error"
+    ],
+    "nullable": false
+  },
+  "event.type": {
+    "type": "keyword",
+    "values": [
+      "access",
+      "error"
+    ],
+    "nullable": false
+  },
+  "event.domain": {
+    "type": "keyword",
+    "values": [
+      "apache.access",
+      "apache.error"
+    ],
+    "nullable": false
+  },
+  "event.kind": {
+    "type": "keyword",
+    "values": [
+      "error",
+      "event"
+    ],
+    "nullable": false
+  },
+  "communication.source.address": {
+    "type": "keyword",
+    "values": [
+      "127.0.0.1"
+    ],
+    "nullable": false
+  },
+  "communication.source.ip": {
+    "type": "keyword",
+    "values": [
+      "42.204.151.42"
+    ],
+    "nullable": false
+  },
+  "communication.source.geo.country": {
+    "type": "keyword",
+    "values": [
+      "China",
+      "France",
+      "United States"
+    ],
+    "nullable": false
+  },
+  "communication.source.geo.country_iso_code": {
+    "type": "keyword",
+    "values": [
+      "CN",
+      "FR",
+      "US"
+    ],
+    "nullable": false
+  },
+  "body": {
+    "type": "keyword",
+    "values": [
+      "15.248.1.132 - - [21/Jun/2023:21:35:24 +0000] \"GET / HTTP/1.1\" 403 45 \"-\" \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36\"",
+      "[Sat Aug 12 04:05:51 2006] [notice] Apache/1.3.11 (Unix) mod_perl/1.21 configured -- resuming normal operations"
+    ],
+    "nullable": false
+  },
+  "traceId": {
+    "type": "keyword",
+    "values": [
+      "d09d293a27c9a754f2bf0196b5a1c9bc"
+    ],
+    "nullable": false
+  },
+  "spanId": {
+    "type": "keyword",
+    "values": [
+      "18ba0e515e42dad0"
+    ],
+    "nullable": false
+  },
+  "@timestamp": {
+    "type": "time",
+    "min": "2023-07-21T16:52:08.000Z",
+    "max": "2023-07-21T16:52:08.000Z",
+    "nullable": false
+  },
+  "severity.text": {
+    "type": "keyword",
+    "values": [
+      "cgid:error"
+    ],
+    "nullable": true
+  }
+}
