@@ -3,7 +3,7 @@ import sys
 import random
 import re
 from context import QueryContext
-from sys import argv
+from functools import reduce
 
 class Retry(Exception):
     """
@@ -102,9 +102,26 @@ def stats(context: QueryContext):
 
 
 def where(context: QueryContext):
-    key = context.random_key()
-    expr = context.generate_boolean_expression(key)
-    return f"where {expr}"
+    exprs = []
+    seen_keys = set()
+    for _ in range(random.choice([1, 1, 1, 2, 2, 3])):
+        key, retries = context.random_key(), 0
+        while key in seen_keys:
+            if retries > 10:
+                raise Retry()
+            key = context.random_key()
+            retries += 1
+        seen_keys.add(key)
+
+        expr = context.generate_boolean_expression(key)
+        if random.random() < 0.2:
+            exprs.append(f"NOT {expr}")
+        else:
+            exprs.append(expr)
+    result = reduce(lambda a, b: a + random.choice([
+        " AND ", " OR ", " XOR "
+    ]) + b, exprs)
+    return f"where {result}"
 
 
 def generate_segment(context: QueryContext, allow_terminals=False, retries=0) -> str | None:

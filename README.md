@@ -22,24 +22,24 @@ As this is still a prototype, there's no formal CLI interface.
 
 ```sh
 > python3 gen_queries.py ss4o_logs-nginx-sample-sample 20
-source = ss4o_logs-nginx-sample-sample | fields event.domain, event.category, http.flavor, body | where event.domain = 'nginx.access' | top 1 event.category by body
-source = ss4o_logs-nginx-sample-sample | stats sum(http.response.bytes)
-source = ss4o_logs-nginx-sample-sample | sort @timestamp | fields http.flavor, http.request.method, span_id | where http.flavor = '1.1' | fields span_id | top 1 span_id
-source = ss4o_logs-nginx-sample-sample | fields event.category | where event.category != 'web' | where event.category != 'web' | fields event.category
-source = ss4o_logs-nginx-sample-sample | fields trace_id, @timestamp
-source = ss4o_logs-nginx-sample-sample | fields observedTimestamp, http.url, http.response.bytes, event.domain, http.request.method | where event.domain != 'nginx.access' | dedup http.url
-source = ss4o_logs-nginx-sample-sample | rename http.request.method as method | fields method, observedTimestamp, attributes.data_stream.type, span_id, attributes.data_stream.namespace | rename span_id as id
-source = ss4o_logs-nginx-sample-sample | fields trace_id | rename trace_id as id | fields id
-source = ss4o_logs-nginx-sample-sample | rename event.domain as domain | sort communication.source.ip | dedup http.response.bytes
-source = ss4o_logs-nginx-sample-sample | rename attributes.data_stream.dataset as dataset | sort communication.source.ip | dedup event.result
-source = ss4o_logs-nginx-sample-sample | where http.response.status_code != '400' | sort - @timestamp | fields http.response.bytes, communication.source.address, http.request.method, event.category | where http.request.method != 'DELETE'
-source = ss4o_logs-nginx-sample-sample | where http.request.method != 'DELETE'
-source = ss4o_logs-nginx-sample-sample | sort @timestamp | where communication.source.address = '127.0.0.1'
-source = ss4o_logs-nginx-sample-sample | rename event.category as category | rare http.url by span_id
-source = ss4o_logs-nginx-sample-sample | where event.type = 'access' | where communication.source.ip < '237.103.69.52' | dedup http.request.method
-source = ss4o_logs-nginx-sample-sample | fields http.request.method, body, @timestamp, event.kind | sort body
-source = ss4o_logs-nginx-sample-sample | rare http.response.status_code
-source = ss4o_logs-nginx-sample-sample | stats sum(http.response.bytes), avg(http.response.bytes)
-source = ss4o_logs-nginx-sample-sample | fields communication.source.address, http.request.method, event.result | fields communication.source.address, http.request.method, event.result | rare communication.source.address by event.result
-source = ss4o_logs-nginx-sample-sample | fields body, http.response.bytes, attributes.data_stream.type, http.flavor, communication.source.address | fields http.flavor, communication.source.address, attributes.data_stream.type, http.response.bytes, body | fields http.response.bytes, http.flavor, body, communication.source.address, attributes.data_stream.type | where communication.source.address = '127.0.0.1'
+source = ss4o_logs-nginx-sample-sample | sort - communication.source.ip | rename trace_id as id | fields event.name, @timestamp, http.flavor, http.url | where http.flavor != '1.1' | rare @timestamp by event.name
+source = ss4o_logs-nginx-sample-sample | fields http.flavor, http.url, communication.source.ip | sort communication.source.ip | rename http.url as url | dedup http.flavor
+source = ss4o_logs-nginx-sample-sample | rename http.response.status_code as code | sort http.response.bytes
+source = ss4o_logs-nginx-sample-sample | fields attributes.data_stream.dataset, @timestamp, event.name | rename event.name as name | where name = 'access' OR attributes.data_stream.dataset = 'nginx.access' XOR @timestamp = TIMESTAMP('2023-06-19 09:59:13') | sort - @timestamp | rare @timestamp
+source = ss4o_logs-nginx-sample-sample | stats max(http.response.bytes), min(http.response.bytes), avg(http.response.bytes) by event.name
+source = ss4o_logs-nginx-sample-sample | sort - communication.source.ip | rename attributes.data_stream.type as type | where event.domain = 'nginx.access' XOR @timestamp < TIMESTAMP('2023-06-19 09:59:12') | fields span_id | top 20 span_id
+source = ss4o_logs-nginx-sample-sample | fields attributes.data_stream.namespace, event.type, event.result, event.name, event.category | rename attributes.data_stream.namespace as namespace | where event.type = 'access' OR event.result = 'success' | stats count() by event.result
+source = ss4o_logs-nginx-sample-sample | sort body | where trace_id != '102981ABCD2901' OR http.response.bytes = 2895 XOR communication.source.ip LIKE '%69' | rename event.type as type | dedup attributes.data_stream.type
+source = ss4o_logs-nginx-sample-sample | rename attributes.data_stream.dataset as dataset | sort http.response.bytes
+source = ss4o_logs-nginx-sample-sample | rename http.flavor as flavor | dedup span_id
+source = ss4o_logs-nginx-sample-sample | where http.response.bytes <= 1477 XOR @timestamp >= TIMESTAMP('2023-06-19 09:59:11') | fields span_id | rename span_id as id
+source = ss4o_logs-nginx-sample-sample | dedup event.name
+source = ss4o_logs-nginx-sample-sample | rename communication.source.address as address | sort @timestamp | rare trace_id by http.response.bytes
+source = ss4o_logs-nginx-sample-sample | where http.response.status_code = '400' XOR span_id = 'abcdef1010' | top 5 observedTimestamp by attributes.data_stream.namespace
+source = ss4o_logs-nginx-sample-sample | where event.category != 'web' AND attributes.data_stream.dataset = 'nginx.access' | fields communication.source.ip, observedTimestamp, event.category, http.response.status_code | head 20
+source = ss4o_logs-nginx-sample-sample | fields http.request.method, span_id | top 20 span_id by http.request.method
+source = ss4o_logs-nginx-sample-sample | stats min(http.response.bytes), avg(http.response.bytes)
+source = ss4o_logs-nginx-sample-sample | stats max(http.response.bytes)
+source = ss4o_logs-nginx-sample-sample | fields event.category, event.result, communication.source.ip, attributes.data_stream.type, event.name | rename event.name as name | where communication.source.ip < '111.51.133.169' | head
+source = ss4o_logs-nginx-sample-sample | rename span_id as id | where NOT body > '202.179.32.148 - - [19/Jun/2023:16:59:05 +0000] "DELETE /array%20Horizontal.css HTTP/1.1" 200 949 "-" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_6_4 rv:5.0; en-US) AppleWebKit/532.32.4 (KHTML, like Gecko) Version/5.1 Safari/532.32.4"' XOR attributes.data_stream.namespace = 'production' | fields event.type, event.result, event.category | dedup event.category
 ```
