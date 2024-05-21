@@ -48,7 +48,8 @@ def find_schema(agg_records):
     record_count = max(len(v) for v in agg_records.values())
     result = {}
     for key, values in agg_records.items():
-        first_value = next((v for v in values if v is not None), None)
+        values = [v for v in values if v is not None]
+        first_value = next(iter(values), None)
         value_type = find_type(first_value) if first_value else "none"
         nullable = len(values) < record_count
         match value_type:
