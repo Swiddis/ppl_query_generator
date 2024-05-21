@@ -110,11 +110,11 @@ def generate_segment(context: QueryContext, allow_terminals=False, retries=0) ->
     if retries >= 10:
         # Assume this query is at a dead end
         return None
-    choices = [dedup, fields, rename, sort, where]
+    choices = [fields, rename, sort, where]
     if allow_terminals:
         # Terminal conditions should only go at the end of a query. Generally not strictly necessary
         # that the query ends after one of these, but it's not clear why it'd be necessary
-        choices += [head, rare, stats, top]
+        choices += [dedup, head, rare, stats, top]
     segment = random.choice(choices)
     try:
         return segment(context)
