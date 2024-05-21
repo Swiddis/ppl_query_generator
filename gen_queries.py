@@ -35,6 +35,7 @@ def rename(context: QueryContext):
 
     context[tail] = context[key]
     del context[key]
+
     return f"rename {key} as {tail}"
 
 
@@ -52,7 +53,10 @@ def where(context: QueryContext):
     return f"where {expr}"
 
 
-def generate_segment(context: QueryContext, allow_terminals=False):
+def generate_segment(context: QueryContext, allow_terminals=False, retries=0) -> str | None:
+    if retries >= 10:
+        # Assume this query is at a dead end
+        return None
     choices = [dedup, fields, rename, where]
     if allow_terminals:
         choices += [stats]
@@ -60,7 +64,7 @@ def generate_segment(context: QueryContext, allow_terminals=False):
     try:
         return segment(context)
     except Retry:
-        return generate_segment(context, allow_terminals)
+        return generate_segment(context, allow_terminals, retries=retries+1)
 
 
 def generate_query(index_name: str, context: QueryContext):
@@ -69,7 +73,10 @@ def generate_query(index_name: str, context: QueryContext):
     for segment_idx in range(segment_count):
         if len(context) == 0:
             break
-        query += " | " + generate_segment(context, segment_idx + 1 == segment_count)
+        segment = generate_segment(context, segment_idx + 1 == segment_count)
+        if segment is None:
+            break
+        query += " | " + segment
 
     return query
 
