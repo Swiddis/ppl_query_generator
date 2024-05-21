@@ -27,6 +27,10 @@ def fields(context: QueryContext):
     return f"fields {', '.join(fields)}"
 
 
+def head(_context: QueryContext):
+    return random.choice(["head 1", "head 5", "head", "head 20", "head 50"])
+
+
 def rename(context: QueryContext):
     key = context.random_key()
     tail = re.split(r"[\._]", key)[-1]
@@ -67,7 +71,9 @@ def generate_segment(context: QueryContext, allow_terminals=False, retries=0) ->
         return None
     choices = [dedup, fields, rename, sort, where]
     if allow_terminals:
-        choices += [stats]
+        # Terminal conditions should only go at the end of a query. Generally not strictly necessary
+        # that the query ends after one of these, but it's not clear why it'd be necessary
+        choices += [head, stats]
     segment = random.choice(choices)
     try:
         return segment(context)
