@@ -3,6 +3,7 @@ import sys
 import random
 import re
 from context import QueryContext
+from sys import argv
 
 class Retry(Exception):
     """
@@ -137,20 +138,20 @@ def generate_query(index_name: str, context: QueryContext):
 
 
 if __name__ == "__main__":
-    SCHEMA_NAME = "nginx"
-
-    if len(sys.argv) == 2:
-        gen_count = int(sys.argv[1])
-    elif len(sys.argv) == 1:
-        gen_count = 10
-    else:
-        print("Usage: gen_queries.py [amount]")
+    if len(sys.argv) < 2 or len(sys.argv) > 3:
+        print("usage: gen_queries.py [schema] [quantity?]")
         exit(1)
+    schema_name = sys.argv[1]
 
-    with open(f"schemas/{SCHEMA_NAME}.json", "r") as schema_file:
+    if len(sys.argv) == 3:
+        gen_count = int(sys.argv[2])
+    else:
+        gen_count = 10
+
+    with open(f"schemas/{schema_name}.json", "r") as schema_file:
         schema = json.load(schema_file)
 
     for _ in range(gen_count):
         context = QueryContext(schema)
-        query = generate_query(SCHEMA_NAME, context)
+        query = generate_query(schema_name, context)
         print(query)
