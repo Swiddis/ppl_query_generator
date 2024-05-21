@@ -184,7 +184,7 @@ if __name__ == "__main__":
     with open(f"schemas/{schema_name}.json", "r") as schema_file:
         schema = json.load(schema_file)
 
-    for i in range(gen_count):
+    for _ in range(gen_count):
         context = QueryContext(schema)
         query = generate_query(schema_name, context)
-        print(f"{i+1}.", query)
+        print(query)
