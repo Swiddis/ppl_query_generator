@@ -15,7 +15,7 @@ class QueryContext(dict):
         self.__dict__ == self
 
         # Guards are conditions that block values from being generated
-        self.guards = {key: set() for key in context}
+        self.seen_segments = []
 
     def random_key(self, sortable=False, numeric=False):
         items = list(self.items())

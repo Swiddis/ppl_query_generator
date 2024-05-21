@@ -116,6 +116,8 @@ def generate_segment(context: QueryContext, allow_terminals=False, retries=0) ->
         # Terminal conditions should only go at the end of a query. Generally not strictly necessary
         # that the query ends after one of these, but it's not clear why it'd be necessary
         choices += [dedup, head, rare, stats, top]
+    for cmd in context.seen_segments:
+        choices.remove(cmd)
     segment = random.choice(choices)
     try:
         return segment(context)
@@ -133,8 +135,22 @@ def generate_query(index_name: str, context: QueryContext):
         if segment is None:
             break
         query += " | " + segment
+        context.seen_segments.append(QUERY_FN_MAP[segment.split()[0]])
 
     return query
+
+
+QUERY_FN_MAP = {
+    "dedup": dedup,
+    "fields": fields,
+    "head": head,
+    "rare": rare,
+    "top": top,
+    "rename": rename,
+    "sort": sort,
+    "stats": stats,
+    "where": where,
+}
 
 
 if __name__ == "__main__":
