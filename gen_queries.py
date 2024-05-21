@@ -1,7 +1,15 @@
 import json
 import sys
 import random
+import re
 from context import QueryContext
+
+class Retry(Exception):
+    """
+    Custom type to abort a generation attempt and retry from scratch. Retry must only be raised if
+    context is still in its original state: do not modify context before retry.
+    """
+    pass
 
 
 def dedup(context: QueryContext):
@@ -19,6 +27,17 @@ def fields(context: QueryContext):
     return f"fields {', '.join(fields)}"
 
 
+def rename(context: QueryContext):
+    key = context.random_key()
+    tail = re.split(r"[\._]", key)[-1]
+    if tail == key:
+        raise Retry()
+
+    context[tail] = context[key]
+    del context[key]
+    return f"rename {key} as {tail}"
+
+
 def stats(context: QueryContext):
     # TODO for now we assume stats is terminal and only implement count() -- a better
     # implementation will add min/max and other functions, and better detect termination.
@@ -34,11 +53,14 @@ def where(context: QueryContext):
 
 
 def generate_segment(context: QueryContext, allow_terminals=False):
-    choices = [dedup, fields, where]
+    choices = [dedup, fields, rename, where]
     if allow_terminals:
         choices += [stats]
     segment = random.choice(choices)
-    return segment(context)
+    try:
+        return segment(context)
+    except Retry:
+        return generate_segment(context, allow_terminals)
 
 
 def generate_query(index_name: str, context: QueryContext):
