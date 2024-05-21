@@ -190,14 +190,6 @@
     ],
     "nullable": false
   },
-  "body": {
-    "type": "keyword",
-    "values": [
-      "15.248.1.132 - - [21/Jun/2023:21:35:24 +0000] \"GET / HTTP/1.1\" 403 45 \"-\" \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36\"",
-      "[Sat Aug 12 04:05:51 2006] [notice] Apache/1.3.11 (Unix) mod_perl/1.21 configured -- resuming normal operations"
-    ],
-    "nullable": false
-  },
   "traceId": {
     "type": "keyword",
     "values": [
