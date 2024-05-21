@@ -39,6 +39,14 @@ def rename(context: QueryContext):
     return f"rename {key} as {tail}"
 
 
+def sort(context: QueryContext):
+    try:
+        key = context.random_key(sortable=True)
+        return random.choice([f"sort {key}", f"sort - {key}"])
+    except IndexError:
+        # No sortable keys in context
+        raise Retry()
+
 def stats(context: QueryContext):
     # TODO for now we assume stats is terminal and only implement count() -- a better
     # implementation will add min/max and other functions, and better detect termination.
@@ -57,7 +65,7 @@ def generate_segment(context: QueryContext, allow_terminals=False, retries=0) ->
     if retries >= 10:
         # Assume this query is at a dead end
         return None
-    choices = [dedup, fields, rename, where]
+    choices = [dedup, fields, rename, sort, where]
     if allow_terminals:
         choices += [stats]
     segment = random.choice(choices)

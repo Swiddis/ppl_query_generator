@@ -5,7 +5,7 @@ import datetime
 
 class QueryContext(dict):
     """
-    Light wrapper around dict that has some helper methods for usage in gen_queries
+    Wrapper around dict that has some helper methods for usage in gen_queries
     """
 
     def __init__(self, context):
@@ -17,8 +17,11 @@ class QueryContext(dict):
         # Guards are conditions that block values from being generated
         self.guards = {key: set() for key in context}
 
-    def random_key(self):
-        return random.choice(list(self.keys()))
+    def random_key(self, sortable=False):
+        items = list(self.items())
+        if sortable:
+            items = [(k, v) for k, v in items if v["type"] in ("text", "int", "time")]
+        return random.choice(items)[0]
 
     def random_item(self):
         return random.choice(list(self.items()))
