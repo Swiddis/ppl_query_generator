@@ -37,9 +37,9 @@ class QueryContext(dict):
             case "keyword" | "text":
                 return repr(random.choice(props["values"]))
             case "int":
-                return repr(random.randint(props["min"], props["max"]))
+                return repr(random.randint(int(props["min"]), int(props["max"])))
             case "float":
-                return repr(random.random() * (props["max"] - props["min"]) + props["min"])
+                return repr(round(random.random() * (props["max"] - props["min"]) + props["min"]), 1)
             case "list":
                 # TODO this probably needs better handling but it's not clear what lists
                 # actually do
@@ -92,12 +92,13 @@ class QueryContext(dict):
                 return f"{key} {op} {sample_value}"
             case "text":
                 op = random.choice(["=", ">", ">=", "<", "<=", "LIKE"])
+                if len(sample_value) > 20:
+                    op = "LIKE" # Equality checking for large strings gets messy fast
                 if op == "LIKE":
-                    value = random.choice(props["values"])
-                    idx = random.randint(0, len(value) - 1)
+                    idx = random.randint(2, 20)
                     # For now, only prefix or suffix is counted
                     sample_value = repr(
-                        random.choice([value[0:idx] + "%", "%" + value[idx:]])
+                        random.choice([sample_value[0:idx] + "%", "%" + sample_value[-idx:]])
                     )
                 return f"{key} {op} {sample_value}"
             case "int":
