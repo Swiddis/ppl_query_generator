@@ -97,7 +97,10 @@ def find_schema(agg_records):
                     "unique": max(ctr.values()) == 1,
                 }
             case "list":
-                ctr = Counter(v for l in values for v in l)
+                try:
+                    ctr = Counter(v for l in values for v in l)
+                except:
+                    continue
                 max_len = max(len(l) for l in values)
                 min_len = min(len(l) for l in values)
                 if len(ctr) <= 10:
@@ -119,12 +122,16 @@ def find_schema(agg_records):
 
 
 if __name__ == "__main__":
-    DATA_FILE = "data/apache_raw.json"
-    SCHEMA_FILE = "schemas/ss4o_logs_apache-apache-sample-sample.json"
+    DATA_FILE = "data/ecommerce.json"
+    SCHEMA_FILE = "schemas/ecommerce.json"
 
     with open(DATA_FILE, "r") as in_file:
         records = json.load(in_file)
 
+    # Try to automatically detect and transform data exported directly from an OS index
+    if "_source" in records[0] and "_index" in records[0]:
+        records = [record["_source"] for record in records]
+    
     agg_records = columnar_aggregate_records(records)
     schema = find_schema(agg_records)
 
