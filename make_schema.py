@@ -121,9 +121,16 @@ def find_schema(agg_records):
     return result
 
 
+def escape_schema(schema):
+    escaped = lambda k: k if re.match(r'^[\w\.]+$', k) else f"`{k}`"
+    return {
+        escaped(key): value for key, value in schema.items()
+    }
+
+
 if __name__ == "__main__":
-    DATA_FILE = "data/ecommerce.json"
-    SCHEMA_FILE = "schemas/ecommerce.json"
+    DATA_FILE = "data/otel_metrics.json"
+    SCHEMA_FILE = "schemas/otel-metrics-*.json"
 
     with open(DATA_FILE, "r") as in_file:
         records = json.load(in_file)
@@ -134,6 +141,7 @@ if __name__ == "__main__":
     
     agg_records = columnar_aggregate_records(records)
     schema = find_schema(agg_records)
+    schema = escape_schema(schema)
 
     with open(SCHEMA_FILE, "w") as out_file:
         json.dump(schema, out_file, indent=2)
