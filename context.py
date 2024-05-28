@@ -24,24 +24,28 @@ class QueryContext(dict):
         # Force fields tracks fields that should always be in the final context.
         self.forced_fields = set()
 
+    # Helper for `Context.random_item` that only returns the key.
+    def random_key(self, **kwargs):
+        return self.random_item(**kwargs)[0]
+
     """
     sortable: key types where operations like `<` are well-defined (e.g. text, but not keywords)
     numeric: any number types
+    time: only allow the time type
     prefer_forced: if there exists forced keys in the context, choose from them.
     Generally used by the caller to conditionally avoid dropping a forced field from the context.
     """
-    def random_key(self, sortable=False, numeric=False, prefer_forced=False):
+    def random_item(self, sortable=False, numeric=False, time=False, prefer_forced=False):
         items = list(self.items())
         if sortable:
             items = [(k, v) for k, v in items if v["type"] in ("text", "int", "float", "time")]
         if numeric:
             items = [(k, v) for k, v in items if v["type"] in ("float", "int")]
+        if time:
+            items = [(k, v) for k, v in items if v["type"] == "time"]
         if prefer_forced and len(self.forced_fields) > 0:
             items = [(k, v) for k, v in items if k in self.forced_fields]
-        return random.choice(items)[0]
-
-    def random_item(self):
-        return random.choice(list(self.items()))
+        return random.choice(items)
 
     def sample_value(self, key):
         props = self[key]
