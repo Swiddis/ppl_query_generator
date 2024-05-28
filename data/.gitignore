@@ -1,0 +1,5 @@
+# Ignore everything here except the specific 2 example files
+*
+!.gitignore
+!apache_raw.json
+!nginx_raw.json

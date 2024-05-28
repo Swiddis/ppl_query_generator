@@ -1,0 +1,5 @@
+# Ignore everything here except the specific 2 example files
+*
+!.gitignore
+!ss4o_logs_apache-apache-sample-sample.json
+!ss4o_logs-nginx-sample-sample.json
