@@ -1,5 +1,4 @@
-# Ignore everything here except the specific 2 example files
+# Ignore everything here except gitignore
+# You can still manually update data/schema files with `git add -f`
 *
 !.gitignore
-!apache_raw.json
-!nginx_raw.json
