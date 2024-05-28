@@ -7,6 +7,7 @@ from collections import defaultdict, Counter
 import json
 import re
 import datetime
+import sys
 
 def can_iso_parse(date_string):
     try:
@@ -135,8 +136,11 @@ def escape_schema(schema):
 
 
 if __name__ == "__main__":
-    DATA_FILE = "data/otel_metrics.json"
-    SCHEMA_FILE = "schemas/otel-metrics-*.json"
+    if len(sys.argv) != 3:
+        print("Usage: make_schema.py [input data file] [output schema file]")
+        sys.exit(1)
+    DATA_FILE = sys.argv[1]
+    SCHEMA_FILE = sys.argv[2]
 
     with open(DATA_FILE, "r") as in_file:
         records = json.load(in_file)

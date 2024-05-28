@@ -172,7 +172,7 @@ QUERY_FN_MAP = {
 
 if __name__ == "__main__":
     if len(sys.argv) < 2 or len(sys.argv) > 3:
-        print("usage: gen_queries.py [schema] [quantity?]")
+        print("Usage: gen_queries.py [schema] [quantity?]")
         exit(1)
     schema_name = sys.argv[1]
 

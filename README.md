@@ -11,11 +11,10 @@ The project has no external dependencies at the moment: any Python 3.10+ interpr
 As this is still a prototype, there's no formal CLI interface.
 
 1. Add json data to `data`.
-2. In `make_schema.py` update `DATA_FILE` and `SCHEMA_FILE`. Run it. You should see a
-   corresponding file in `schemas`. For best results, the schema file name should match
-   the OS Index you plan on querying, as it's what's used as the `source` in the
-   generated queries.
-3. Run `gen_queries.py` with the schema name and an optional quantity.
+2. Convert the data to a schema with `make_schema.py`. Ideally, the name of the output file should
+   match the target index for the queries, as it's what's used as the `source` location.
+   `python3 make_schema.py data/nginx_raw.json schemas/ss4o_logs-nginx-sample-sample.json`
+3. Run `gen_queries.py` with the schema name and an optional quantity (default 10).
    `python3 gen_queries.py ss4o_logs-nginx-sample-sample 30`.
 
 ### Example
