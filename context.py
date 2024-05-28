@@ -19,13 +19,25 @@ class QueryContext(dict):
 
         # Guards are conditions that block values from being generated
         self.seen_segments = []
+        # When introducing new fields (e.g. rename, eval), we always want to use those fields later
+        # in the query. Otherwise we get queries like `source=example | rename a as b | fields c`.
+        # Force fields tracks fields that should always be in the final context.
+        self.forced_fields = set()
 
-    def random_key(self, sortable=False, numeric=False):
+    """
+    sortable: key types where operations like `<` are well-defined (e.g. text, but not keywords)
+    numeric: any number types
+    prefer_forced: if there exists forced keys in the context, choose from them.
+    Generally used by the caller to conditionally avoid dropping a forced field from the context.
+    """
+    def random_key(self, sortable=False, numeric=False, prefer_forced=False):
         items = list(self.items())
         if sortable:
             items = [(k, v) for k, v in items if v["type"] in ("text", "int", "float", "time")]
         if numeric:
             items = [(k, v) for k, v in items if v["type"] in ("float", "int")]
+        if prefer_forced and len(self.forced_fields) > 0:
+            items = [(k, v) for k, v in items if k in self.forced_fields]
         return random.choice(items)[0]
 
     def random_item(self):
@@ -119,11 +131,13 @@ class QueryContext(dict):
                 raise ValueError(f"Unknown prop type: {unknown}")
 
 
-    def filter(self, keys):
+    def filter_to(self, keys):
         old_keys = list(self.keys())
         for key in old_keys:
+            if key not in keys and key in self.forced_fields:
+                raise ValueError(f"Attempted to filter a forced field: key {key} is forced but not in {keys}")
             if key not in keys:
                 del self[key]
 
-    def clear(self):
-        self.filter([])
+    def clear(self, keep_forced=False):
+        self.filter_to([] if not keep_forced else list(self.force_fields))

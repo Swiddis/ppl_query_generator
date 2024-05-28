@@ -5,11 +5,13 @@ import re
 from context import QueryContext
 from functools import reduce
 
+
 class Retry(Exception):
     """
     Custom type to abort a generation attempt and retry from scratch. Retry must only be raised if
     context is still in its original state: do not modify context before retry.
     """
+
     pass
 
 
@@ -22,8 +24,10 @@ def fields(context: QueryContext):
     keys = list(context.keys())
     take_count = random.randint(1, min(5, len(context)))
     fields = random.sample(keys, take_count)
+    # Require forced fields
+    fields = sorted(set(fields) | context.forced_fields)
 
-    context.filter(fields)
+    context.filter_to(fields)
 
     return f"fields {', '.join(fields)}"
 
@@ -34,34 +38,39 @@ def head(_context: QueryContext):
 
 def rare(context: QueryContext):
     key = context.random_key()
-    by = context.random_key()
-    context.filter([key, by])
+    by = context.random_key(prefer_forced=True)
     if by != key and random.random() < 0.75:
+        context.filter_to([key, by])
         return f"rare {key} by {by}"
-    else:
-        return f"rare {key}"
-    
+    if by != key and by in context.forced_fields:
+        key = by
+    context.filter_to([key])
+    return f"rare {key}"
+
 
 def top(context: QueryContext):
     top = random.choice(["top 1", "top 5", "top", "top 20", "top 50"])
     key = context.random_key()
-    by = context.random_key()
-    context.filter([key, by])
+    by = context.random_key(prefer_forced=True)
     if by != key and random.random() < 0.75:
+        context.filter_to([key, by])
         return f"{top} {key} by {by}"
-    else:
-        return f"{top} {key}"
+    if by != key and by in context.forced_fields:
+        key = by
+    context.filter_to([key])
+    return f"{top} {key}"
 
 
 def rename(context: QueryContext):
     key = context.random_key()
-    unquoted = key.strip('`')
+    unquoted = key.strip("`")
     tail = re.split(r"(_|[^\w])", unquoted)[-1]
     if tail == unquoted:
         raise Retry()
 
     context[tail] = context[key]
     del context[key]
+    context.forced_fields.add(tail)
 
     return f"rename {key} as {tail}"
 
@@ -74,10 +83,11 @@ def sort(context: QueryContext):
         # No sortable keys in context
         raise Retry()
 
+
 def stats(context: QueryContext):
     # TODO for now we assume stats is terminal and don't deal with context enrichment.
     stats = random.sample(["count", "sum", "avg", "max", "min"], random.randint(1, 3))
-    aggs = []
+    aggs, agg_keys = [], []
     for stat in stats:
         try:
             key = context.random_key(numeric=stat != "count")
@@ -86,17 +96,19 @@ def stats(context: QueryContext):
             else:
                 stat_call = f"{stat}({key})"
             aggs.append(f"{stat_call}")
+            if stat_call != "count()":
+                agg_keys.append(key)
         except IndexError:
             continue
-        
+
     if aggs == []:
         # All stat loops failed
         raise Retry()
-    
-    by = context.random_key()
-    context.clear()
 
-    if not any(by in agg for agg in aggs) and random.random() < 0.5:
+    by = context.random_key(prefer_forced=True)
+    context.filter_to([by] + agg_keys)
+
+    if not any(by in agg for agg in aggs) and (by in context.forced_fields or random.random() < 0.5):
         return f"stats {', '.join(aggs)} by {by}"
     else:
         return f"stats {', '.join(aggs)}"
@@ -119,13 +131,13 @@ def where(context: QueryContext):
         # with generating correct queries corresponding to results with negation
         exprs.append(expr)
     # Not including XOR here since engine struggles a lot with phrasing the questions
-    result = reduce(lambda a, b: a + random.choice([
-        " AND ", " OR "
-    ]) + b, exprs)
+    result = reduce(lambda a, b: a + random.choice([" AND ", " OR "]) + b, exprs)
     return f"where {result}"
 
 
-def generate_segment(context: QueryContext, allow_terminals=False, retries=0) -> str | None:
+def generate_segment(
+    context: QueryContext, allow_terminals=False, retries=0
+) -> str | None:
     if retries >= 10:
         # Assume this query is at a dead end
         return None
@@ -140,7 +152,7 @@ def generate_segment(context: QueryContext, allow_terminals=False, retries=0) ->
     try:
         return segment(context)
     except Retry:
-        return generate_segment(context, allow_terminals, retries=retries+1)
+        return generate_segment(context, allow_terminals, retries=retries + 1)
 
 
 def generate_query(index_name: str, context: QueryContext):
