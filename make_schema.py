@@ -6,8 +6,14 @@ For now these are hardcoded params at the end, make it into CLI args if you wish
 from collections import defaultdict, Counter
 import json
 import re
+import datetime
 
-ISO_TIME_RE = re.compile(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z")
+def can_iso_parse(date_string):
+    try:
+        datetime.datetime.fromisoformat(date_string)
+        return True
+    except:
+        return False
 
 
 def scan_record(record, target, prefix=""):
@@ -29,7 +35,7 @@ def columnar_aggregate_records(records):
 
 
 def find_type(value):
-    if isinstance(value, str) and re.match(ISO_TIME_RE, value):
+    if isinstance(value, str) and can_iso_parse(value):
         return "time"
     elif isinstance(value, str):
         return "str"
