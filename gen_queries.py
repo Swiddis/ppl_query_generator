@@ -55,8 +55,9 @@ def top(context: QueryContext):
 
 def rename(context: QueryContext):
     key = context.random_key()
-    tail = re.split(r"[\._]", key)[-1]
-    if tail == key:
+    unquoted = key.strip('`')
+    tail = re.split(r"(_|[^\w])", unquoted)[-1]
+    if tail == unquoted:
         raise Retry()
 
     context[tail] = context[key]
