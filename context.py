@@ -139,7 +139,7 @@ class QueryContext(dict):
         old_keys = list(self.keys())
         for key in old_keys:
             if key not in keys and key in self.forced_fields:
-                raise ValueError(f"Attempted to filter a forced field: key {key} is forced but not in {keys}")
+                raise ValueError(f"Attempted to filter a forced field: key '{key}' is forced in {self.forced_fields} but not in {keys}")
             if key not in keys:
                 del self[key]
 

@@ -20,6 +20,38 @@ def dedup(context: QueryContext):
     return f"dedup {key}"
 
 
+def eval_cmd(context: QueryContext):
+    # TODO handle more than just time evals
+    try:
+        key = context.random_key(time=True)
+    except IndexError:
+        raise Retry()
+    
+    func_parts = {
+        "SECOND": ("second", 0, 59),
+        "MINUTE": ("minute", 0, 59),
+        "HOUR": ("hour", 0, 59),
+        "DAY": ("day", 1, 31),
+        "WEEK": ("week", 1, 52),
+        "MONTH": ("month", 1, 12),
+        "YEAR": ("year", 1970, 2024),
+        "DAY_OF_WEEK": ("day", 1, 7),
+        "DAY_OF_YEAR": ("day", 1, 366)
+    }
+    part, (var, vmin, vmax) = random.choice(list(func_parts.items()))
+    context[var] = {
+        "type": "int",
+        "min": vmin,
+        "max": vmax,
+        "nullable": False,
+        "unique": False,
+    }
+
+    context.forced_fields.add(var)
+
+    return f"eval {var} = {part}({key})"
+
+
 def fields(context: QueryContext):
     keys = list(context.keys())
     take_count = random.randint(1, min(5, len(context)))
@@ -141,13 +173,17 @@ def generate_segment(
     if retries >= 10:
         # Assume this query is at a dead end
         return None
-    choices = [fields, rename, sort, where]
+    # Forcing commands should mutually exclude each other to prevent death by too-much-context
+    forcing = [eval_cmd, rename]
+    choices = [eval_cmd, fields, rename, sort, where]
     if allow_terminals:
         # Terminal conditions should only go at the end of a query. Generally not strictly necessary
         # that the query ends after one of these, but it's not clear why it'd be necessary
         choices += [dedup, head, rare, stats, top]
     for cmd in context.seen_segments:
         choices.remove(cmd)
+        if cmd in forcing:
+            choices = [c for c in choices if c not in forcing]
     segment = random.choice(choices)
     try:
         return segment(context)
@@ -172,6 +208,7 @@ def generate_query(index_name: str, context: QueryContext):
 
 QUERY_FN_MAP = {
     "dedup": dedup,
+    "eval": eval_cmd,
     "fields": fields,
     "head": head,
     "rare": rare,
