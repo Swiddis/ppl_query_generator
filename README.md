@@ -17,6 +17,36 @@ As this is still a prototype, there's no formal CLI interface.
 3. Run `gen_queries.py` with the schema name and an optional quantity (default 10).
    `python3 gen_queries.py ss4o_logs-nginx-sample-sample 30`.
 
+### Schema Hacking
+
+You can manually update the schema to get more useful queries, e.g. by deleting fields you want to
+ignore. You can also add things to the schema, such as a `parser` to be used in generating `parse`
+commands:
+
+```json5
+  "`attributes.resource.attributes.k8s@pod@name`": {
+    "type": "text",
+    "values": [
+      "opentelemetry-demo-frauddetectionservice-7cf6b57fcb-xzznr",
+      "opentelemetry-demo-kafka-66ff85fbb9-bpgls",
+      "opentelemetry-demo-adservice-57d96c468b-p4qb7",
+      "opentelemetry-demo-frontend-54bcd9bcb8-b8xtt",
+      "opentelemetry-demo-cartservice-7647f56f9f-kdfxt",
+      "opentelemetry-demo-productcatalogservice-587857759c-x9zlr",
+      "opentelemetry-demo-checkoutservice-59b95c87cc-wwsqp",
+      "opentelemetry-demo-shippingservice-6c95677665-fts75",
+      "opentelemetry-demo-loadgenerator-86985889fb-tdps9",
+      "opentelemetry-demo-featureflagservice-c74f6b759-ngrg2"
+    ],
+    "nullable": false,
+    "unique": false,
+    "parser": {
+      "pattern": "opentelemetry-demo-(?P<podSuffix>.+)",
+      "fields": ["podSuffix"]
+    }
+  },
+```
+
 ### Example
 
 ```sh

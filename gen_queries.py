@@ -2,6 +2,7 @@ import json
 import sys
 import random
 import re
+from typing import Any
 from context import QueryContext
 from functools import reduce
 
@@ -67,6 +68,22 @@ def fields(context: QueryContext):
 def head(_context: QueryContext):
     return random.choice(["head 1", "head 5", "head", "head 20", "head 50"])
 
+
+def parse(context: QueryContext):
+    key, params = context.random_item(parse=True)
+    parser = params["parser"]
+    context.forced_fields.add(parser["fields"][0])
+    for field in parser["fields"]:
+        matches = [re.match(parser["pattern"], v) for v in params["values"]]
+        context[field] = {
+            "type": params["type"],
+            "values": [m.group(field) for m in matches],
+            "nullable": False,
+            "unique": False,
+        }
+    # Convert from python regex dialect for group to PPL dialect
+    repr_re = repr(parser['pattern'].replace('?P<', '?<'))
+    return f"parse {key} {repr_re}"
 
 def rare(context: QueryContext):
     key = context.random_key()
@@ -167,6 +184,13 @@ def where(context: QueryContext):
     return f"where {result}"
 
 
+def enable_parsing_if_applicable(context: QueryContext, commands: list[Any]):
+    for _, params in context.items():
+        if "parser" in params:
+            commands.append(parse)
+            return
+
+
 def generate_segment(
     context: QueryContext, allow_terminals=False, retries=0
 ) -> str | None:
@@ -174,14 +198,17 @@ def generate_segment(
         # Assume this query is at a dead end
         return None
     # Forcing commands should mutually exclude each other to prevent death by too-much-context
-    forcing = [eval_cmd, rename]
+    forcing = [eval_cmd, rename, parse]
     choices = [eval_cmd, fields, rename, sort, where]
     if allow_terminals:
         # Terminal conditions should only go at the end of a query. Generally not strictly necessary
         # that the query ends after one of these, but it's not clear why it'd be necessary
         choices += [dedup, head, rare, stats, top]
+    enable_parsing_if_applicable(context, choices)
+
     for cmd in context.seen_segments:
-        choices.remove(cmd)
+        if cmd in choices:
+            choices.remove(cmd)
         if cmd in forcing:
             choices = [c for c in choices if c not in forcing]
     segment = random.choice(choices)
@@ -211,6 +238,7 @@ QUERY_FN_MAP = {
     "eval": eval_cmd,
     "fields": fields,
     "head": head,
+    "parse": parse,
     "rare": rare,
     "top": top,
     "rename": rename,

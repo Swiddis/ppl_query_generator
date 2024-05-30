@@ -35,7 +35,7 @@ class QueryContext(dict):
     prefer_forced: if there exists forced keys in the context, choose from them.
     Generally used by the caller to conditionally avoid dropping a forced field from the context.
     """
-    def random_item(self, sortable=False, numeric=False, time=False, prefer_forced=False):
+    def random_item(self, sortable=False, numeric=False, time=False, prefer_forced=False, parse=False):
         items = list(self.items())
         if sortable:
             items = [(k, v) for k, v in items if v["type"] in ("text", "int", "float", "time")]
@@ -45,6 +45,8 @@ class QueryContext(dict):
             items = [(k, v) for k, v in items if v["type"] == "time"]
         if prefer_forced and len(self.forced_fields) > 0:
             items = [(k, v) for k, v in items if k in self.forced_fields]
+        if parse:
+            items = [(k, v) for k, v in items if "parser" in v]
         return random.choice(items)
 
     def sample_value(self, key):
