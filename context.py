@@ -78,6 +78,8 @@ class QueryContext(dict):
                 result = result_time.strftime("%Y-%m-%d %H:%M:%S")
 
                 return f"TIMESTAMP('{result}')"
+            case "bool":
+                return str(random.random() > 0.5).lower()
             case unknown:
                 raise ValueError(f"Unknown prop type: {unknown}")
 
@@ -118,7 +120,7 @@ class QueryContext(dict):
                     sample_value = repr(
                         random.choice([sample_value[0:idx] + "%", "%" + sample_value[-idx:]])
                     )
-                return f"{key} {op} {sample_value}"
+                return f"{key} {op} {sample_value}" if op != "LIKE" else f"LIKE({key}, {sample_value})"
             case "int":
                 op = random.choice(["=", "!=", ">", ">=", "<", "<="])
                 return f"{key} {op} {sample_value}"
@@ -133,6 +135,8 @@ class QueryContext(dict):
             case "time":
                 op = random.choice(["=", ">", ">=", "<", "<="])
                 return f"{key} {op} {sample_value}"
+            case "bool":
+                return random.choice([key, f"NOT {key}"])
             case unknown:
                 raise ValueError(f"Unknown prop type: {unknown}")
 

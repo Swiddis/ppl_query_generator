@@ -40,6 +40,8 @@ def find_type(value):
         return "time"
     elif isinstance(value, str):
         return "str"
+    elif isinstance(value, bool):
+        return "bool"
     elif isinstance(value, int):
         return "int"
     elif isinstance(value, float):
@@ -98,6 +100,15 @@ def find_schema(agg_records):
                 ctr = Counter(values)
                 result[key] = {
                     "type": "float",
+                    "min": min(values),
+                    "max": max(values),
+                    "nullable": nullable,
+                    "unique": max(ctr.values()) == 1,
+                }
+            case "bool":
+                ctr = Counter(values)
+                result[key] = {
+                    "type": "bool",
                     "min": min(values),
                     "max": max(values),
                     "nullable": nullable,

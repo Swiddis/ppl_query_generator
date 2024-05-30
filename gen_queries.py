@@ -5,6 +5,7 @@ import re
 from typing import Any
 from context import QueryContext
 from functools import reduce
+from verify_query import make_client, verify
 
 
 class Retry(Exception):
@@ -262,7 +263,12 @@ if __name__ == "__main__":
     with open(f"schemas/{schema_name}.json", "r") as schema_file:
         schema = json.load(schema_file)
 
+    queries = []
     for _ in range(gen_count):
         context = QueryContext(schema)
         query = generate_query(schema_name, context)
-        print(query)
+        queries.append(query)
+    
+    client = make_client()
+    for query in queries:
+        verify(client, query)

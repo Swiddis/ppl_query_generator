@@ -4,7 +4,16 @@ A script to generate meaningful(ish) PPL queries given sufficiently vibrant samp
 
 ## Setup
 
-The project has no external dependencies at the moment: any Python 3.10+ interpreter will do.
+Install the project dependencies: `pip install -r requirements.txt`.
+For query validation, create a file `client_conf.json` in the repo root that has a `host`, `user`, and `pass`.
+
+```json
+{
+    "host": "Opensearch HOST link",
+    "user": "username",
+    "pass": "secure password"
+}
+```
 
 ## Usage
 
@@ -49,8 +58,11 @@ commands:
 
 ### Example
 
+It's recommended to pipe the output to a file, since invalid queries will be reported on stderr.
+
 ```sh
-> python3 gen_queries.py ss4o_logs-nginx-sample-sample 20
+> python3 gen_queries.py ss4o_logs-nginx-sample-sample 20 > output.txt
+> cat output.txt
 source = ss4o_logs-nginx-sample-sample | sort - communication.source.ip | rename trace_id as id | fields event.name, @timestamp, http.flavor, http.url | where http.flavor != '1.1' | rare @timestamp by event.name
 source = ss4o_logs-nginx-sample-sample | fields http.flavor, http.url, communication.source.ip | sort communication.source.ip | rename http.url as url | dedup http.flavor
 source = ss4o_logs-nginx-sample-sample | rename http.response.status_code as code | sort http.response.bytes
