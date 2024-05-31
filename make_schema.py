@@ -88,6 +88,7 @@ def find_schema(agg_records):
                         "unique": max(ctr.values()) == 1,
                     }
             case "int":
+                values = list(map(int, values))
                 ctr = Counter(values)
                 result[key] = {
                     "type": "int",
@@ -97,6 +98,7 @@ def find_schema(agg_records):
                     "unique": max(ctr.values()) == 1,
                 }
             case "float":
+                values = list(map(float ,values))
                 ctr = Counter(values)
                 result[key] = {
                     "type": "float",
@@ -106,6 +108,7 @@ def find_schema(agg_records):
                     "unique": max(ctr.values()) == 1,
                 }
             case "bool":
+                values = list(map(bool, values))
                 ctr = Counter(values)
                 result[key] = {
                     "type": "bool",
