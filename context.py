@@ -57,7 +57,7 @@ class QueryContext(dict):
             case "int":
                 return repr(random.randint(int(props["min"]), int(props["max"])))
             case "float":
-                return repr(round(random.random() * (props["max"] - props["min"]) + props["min"]), 1)
+                return repr(round(random.random() * (props["max"] - props["min"]) + props["min"], 1))
             case "list":
                 # TODO this probably needs better handling but it's not clear what lists
                 # actually do
