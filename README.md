@@ -84,3 +84,24 @@ source = ss4o_logs-nginx-sample-sample | stats max(http.response.bytes)
 source = ss4o_logs-nginx-sample-sample | fields event.category, event.result, communication.source.ip, attributes.data_stream.type, event.name | rename event.name as name | where communication.source.ip < '111.51.133.169' | head
 source = ss4o_logs-nginx-sample-sample | rename span_id as id | where NOT body > '202.179.32.148 - - [19/Jun/2023:16:59:05 +0000] "DELETE /array%20Horizontal.css HTTP/1.1" 200 949 "-" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_6_4 rv:5.0; en-US) AppleWebKit/532.32.4 (KHTML, like Gecko) Version/5.1 Safari/532.32.4"' XOR attributes.data_stream.namespace = 'production' | fields event.type, event.result, event.category | dedup event.category
 ```
+
+## Contributing
+
+Contributions are welcome -- feel free to make issues for new syntax coverage, and PRs are welcome too. The code is still small but there are two "bulky" parts for functionality:
+
+- `gen_queries.py` contains the logic for building queries given a `Context`. It has logic that
+  takes random "local expressions" from the `Context` (field names, simple expressions) and strings
+  them together with commands into valid PPL queries. It also includes calls to the verify methods
+  in `verify_query.py` to avoid outputting invalid queries.
+- `context.py` defines the `Context` object. `Context` is a wrapper around the built-in `dict` class
+  that keeps track of what fields are present in the current scope. It provides operations for
+  fetching fields and building local expressions. e.g. if using `fields` to only retrieve some
+  fields, the `Context` keeps track of what fields are available so a query doesn't later try to
+  read deleted fields. Similarly, the `Context` allows using newly introduced fields such as with `eval`.
+
+The other files are more-or-less independent and more straightforward:
+
+- `make_schema.py` is a script that reads a set of sample data and creates a schema file, which
+  contains information on discovered fields and sample values from the field.
+- `verify_query.py` is a wrapper around an OpenSearch Client for testing that queries run correctly.
+  It can safely be commented out if no test cluster is available.
