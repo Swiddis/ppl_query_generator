@@ -1,5 +1,9 @@
 # PPL Query Generator
 
+> [!NOTE]
+> https://github.com/Swiddis/opensearch-sql-distributed-testing is the spiritual successor of this project.
+> This is shared now for historical reasons, and to reference as prior art in generating PPL queries for distributed testing.
+
 A script to generate meaningful(ish) PPL queries given sufficiently vibrant sample data.
 
 ## Setup
